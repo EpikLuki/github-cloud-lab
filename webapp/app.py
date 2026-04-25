@@ -8,13 +8,16 @@ app = Flask(__name__)
 # Połączenie z Redisem (nazwa hosta 'redis' zadziała dzięki sieci Dockera)
 cache = redis.Redis(host=os.environ.get("REDIS_HOST", "redis"), port=6379)
 
+
 @app.route("/")
 def index():
     try:
         visits = cache.incr("visits")
     except Exception:
         visits = "unavailable"
-    return f"<h1>GitHub Cloud Lab v2</h1><p>This page has been visited <strong>{visits}</strong> times.</p>"
+    html_text = f"<h1>GitHub Cloud Lab</h1><p>This page has been visited <strong>{visits}</strong> times.</p>"
+    return html_text
+
 
 @app.route("/info")
 def info():
@@ -22,6 +25,7 @@ def info():
         "hostname": socket.gethostname(),
         "environment": os.environ.get("APP_ENV", "development")
     })
+
 
 @app.route("/health")
 def health():
@@ -32,5 +36,7 @@ def health():
         redis_status = str(e)
     return jsonify({"status": "ok", "redis": redis_status})
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+    
